@@ -107,7 +107,10 @@ Page {
 			}
 			Label {
 				id: routinglabel1
+                width: 450
 				text: "test"
+                wrapMode: Text.WordWrap
+                font.bold: true
 				color: "black"
 			}
 			Image {
@@ -117,7 +120,10 @@ Page {
 			}
 			Label {
 				id: routinglabel2
+                width: 450
 				text: "test2"
+                wrapMode: Text.WordWrap
+                font.bold: true
 				color: "black"
 			}
 			
@@ -151,8 +157,8 @@ Page {
 			}
 			Button {
 				width: parent.width/2
-				text: "-"
-				color: "black"
+                text: "-"
+                color: "black"
 
 				onClicked: {
 					mainview.subtractZoom();
