@@ -67,16 +67,24 @@ bool UnicodeTournamentTrieClient::LoadData()
 {
 	UnloadData();
 	QString filename = fileInDirectory( directory, "Unicode Tournament Trie" );
+	trieFile = new QFile( filename + "_main" );
 	subTrieFile = new QFile( filename + "_sub" );
 	dataFile = new QFile( filename + "_ways" );
 
+	if ( !openQFile( trieFile, QIODevice::ReadOnly ) )
+		return false;
 	if ( !openQFile( subTrieFile, QIODevice::ReadOnly ) )
 		return false;
 	if ( !openQFile( dataFile, QIODevice::ReadOnly ) )
 		return false;
 
+	trieData = ( char* ) trieFile->map( 0, trieFile->size() );
 	subTrieData = ( char* ) subTrieFile->map( 0, subTrieFile->size() );
 
+	if ( trieData == NULL ) {
+		qDebug( "Failed to Memory Map trie data" );
+		return false;
+	}
 	if ( subTrieData == NULL ) {
 		qDebug( "Failed to Memory Map sub trie data" );
 		return false;
@@ -102,7 +110,6 @@ bool UnicodeTournamentTrieClient::UnloadData()
 
 bool UnicodeTournamentTrieClient::find( const char* trie, unsigned* resultNode, QString* missingPrefix, QString prefix )
 {
-	qDebug() << "find";
 	unsigned node = *resultNode;
 	for ( int i = 0; i < ( int ) prefix.length(); ) {
 		utt::Node element;
@@ -138,7 +145,7 @@ bool UnicodeTournamentTrieClient::find( const char* trie, unsigned* resultNode, 
 	return true;
 }
 
-int UnicodeTournamentTrieClient::getSuggestion( const char* trie, QStringList* resultNames, QStringList* placeNames, QVector<unsigned> *dataIndex, unsigned node, int count, const QString prefix )
+int UnicodeTournamentTrieClient::getSuggestion( const char* trie, QStringList* resultNames, unsigned node, int count, const QString prefix )
 {
 	std::vector< Suggestion > candidates( 1 );
 	candidates[0].index = node;
@@ -167,11 +174,7 @@ int UnicodeTournamentTrieClient::getSuggestion( const char* trie, QStringList* r
 				else
 					suggestion += next.prefix[i];
 			}
-			for (unsigned i = 0; i < element.dataList.size(); i++) {
-				resultNames->push_back( suggestion );
-				dataIndex->push_back(i);
-				placeNames->push_back(element.placeDataList[i].name);
-			}
+			resultNames->push_back( suggestion );
 			count--;
 		}
 		for ( std::vector< utt::Label >::const_iterator c = element.labelList.begin(), e = element.labelList.end(); c != e; ++c ) {
@@ -207,11 +210,12 @@ bool UnicodeTournamentTrieClient::GetPlaceSuggestions( const QString& input, int
 	else {
 		inputSuggestions->push_back( input + prefix );
 	}
+	getSuggestion( trieData, suggestions, node, amount, name + prefix );
 	std::sort( inputSuggestions->begin(), inputSuggestions->end() );
 	return true;
 }
 
-bool UnicodeTournamentTrieClient::GetStreetSuggestions( int placeID, const QString& input, int amount, QStringList* suggestions, QStringList* placeNames, QVector<unsigned> *dataIndex, QStringList* inputSuggestions )
+bool UnicodeTournamentTrieClient::GetStreetSuggestions( int placeID, const QString& input, int amount, QStringList* suggestions, QStringList* inputSuggestions )
 {
 	if ( placeID < 0 )
 		return false;
@@ -231,7 +235,7 @@ bool UnicodeTournamentTrieClient::GetStreetSuggestions( int placeID, const QStri
 	else {
 		inputSuggestions->push_back( input + prefix );
 	}
-	getSuggestion( subTrieData + placeID, suggestions, placeNames, dataIndex, node, amount, name + prefix );
+	getSuggestion( subTrieData + placeID, suggestions, node, amount, name + prefix );
 	std::sort( inputSuggestions->begin(), inputSuggestions->end() );
 	return true;
 }
@@ -257,7 +261,7 @@ bool UnicodeTournamentTrieClient::GetPlaceData( QString input, QVector< int >* p
 	return placeIDs->size() != 0;
 }
 
-bool UnicodeTournamentTrieClient::GetStreetData( int placeID, QString input, unsigned dataIndex, QVector< int >* segmentLength, QVector< UnsignedCoordinate >* coordinates, QString *place )
+bool UnicodeTournamentTrieClient::GetStreetData( int placeID, QString input, QVector< int >* segmentLength, QVector< UnsignedCoordinate >* coordinates )
 {
 	if ( placeID < 0 )
 		return false;
@@ -270,21 +274,19 @@ bool UnicodeTournamentTrieClient::GetStreetData( int placeID, QString input, uns
 	utt::Node element;
 	element.Read( subTrieData + placeID + node );
 
-	utt::Data data = element.dataList[dataIndex];
-	unsigned* buffer = new unsigned[data.length * 2];
-	dataFile->seek( data.start * sizeof( unsigned ) * 2 );
-	dataFile->read( ( char* ) buffer, data.length * 2 * sizeof( unsigned ) );
-	for ( unsigned start = 0; start < data.length; ++start ) {
-		UnsignedCoordinate temp;
-		temp.x = buffer[start * 2];
-		temp.y = buffer[start * 2 + 1];
-		coordinates->push_back( temp );
+	for ( std::vector< utt::Data >::const_iterator i = element.dataList.begin(), e = element.dataList.end(); i != e; ++i ) {
+		unsigned* buffer = new unsigned[i->length * 2];
+		dataFile->seek( i->start * sizeof( unsigned ) * 2 );
+		dataFile->read( ( char* ) buffer, i->length * 2 * sizeof( unsigned ) );
+		for ( unsigned start = 0; start < i->length; ++start ) {
+			UnsignedCoordinate temp;
+			temp.x = buffer[start * 2];
+			temp.y = buffer[start * 2 + 1];
+			coordinates->push_back( temp );
+		}
+		delete[] buffer;
+		segmentLength->push_back( coordinates->size() );
 	}
-	delete[] buffer;
-	segmentLength->push_back( coordinates->size() );
-	
-	utt::PlaceData placeData = element.placeDataList[dataIndex];
-	*place = placeData.name;
 
 	return segmentLength->size() != 0;
 }
