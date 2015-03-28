@@ -21,6 +21,7 @@ along with MoNav.  If not, see <http://www.gnu.org/licenses/>.
 #define MAPDATA_H
 
 #include "interfaces/iaddresslookup.h"
+#include "interfaces/isimpleaddresslookup.h"
 #include "interfaces/igpslookup.h"
 #include "interfaces/irenderer.h"
 #include "interfaces/irouter.h"
@@ -112,6 +113,7 @@ public:
 	// returns an instance of a required plugin
 	// only available after a successfull call to load() / loadLast()
 	IAddressLookup* addressLookup();
+	ISimpleAddressLookup* simpleAddressLookup();
 	IGPSLookup* gpsLookup();
 	IRenderer* renderer();
 	IRouter* router();

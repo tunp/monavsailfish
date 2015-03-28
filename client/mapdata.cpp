@@ -49,6 +49,7 @@ struct MapData::PrivateImplementation {
 	IRenderer* renderer;
 	// stores a pointer to the current address lookup plugin
 	IAddressLookup* addressLookup;
+	ISimpleAddressLookup* simpleAddressLookup;
 	// stores a pointer to the current GPS lookup plugin
 	IGPSLookup* gpsLookup;
 	// stores a pointer to the current router plugin
@@ -98,6 +99,13 @@ bool MapData::PrivateImplementation::testPlugin( QObject* plugin )
 			needed = true;
 		}
 	}
+	if ( ISimpleAddressLookup *interface = qobject_cast< ISimpleAddressLookup* >( plugin ) ) {
+		if ( interface->GetName() == addressLookupName )
+		{
+			simpleAddressLookup = interface;
+			needed = true;
+		}
+	}
 	return needed;
 }
 
@@ -108,6 +116,7 @@ MapData::MapData() :
 	d->informationLoaded = false;
 
 	d->addressLookup = NULL;
+	d->simpleAddressLookup = NULL;
 	d->gpsLookup = NULL;
 	d->renderer = NULL;
 	d->router = NULL;
@@ -388,9 +397,13 @@ bool MapData::load( const Module& routingModule, const Module& renderingModule, 
 			qCritical() << "Renderer file format not compatible";
 			success = false;
 		}
-		if ( !d->addressLookup->IsCompatible( addressLookupModule.fileFormats[0] ) ) {
+		if ( !d->addressLookup || !d->addressLookup->IsCompatible( addressLookupModule.fileFormats[0] ) ) {
 			qCritical() << "Address Lookup file format not compatible";
-			success = false;
+			d->addressLookup = 0;
+		}
+		if ( !d->simpleAddressLookup || !d->simpleAddressLookup->IsCompatible( addressLookupModule.fileFormats[0] ) ) {
+			qCritical() << "Simple Address Lookup file format not compatible";
+			d->simpleAddressLookup = 0;
 		}
 	}
 
@@ -399,7 +412,13 @@ bool MapData::load( const Module& routingModule, const Module& renderingModule, 
 		d->router->SetInputDirectory( routingModule.path );
 		d->gpsLookup->SetInputDirectory( routingModule.path );
 		d->renderer->SetInputDirectory( renderingModule.path );
-		d->addressLookup->SetInputDirectory( addressLookupModule.path );
+		if ( d->addressLookup ) {
+			d->addressLookup->SetInputDirectory( addressLookupModule.path );
+		}
+		if ( d->simpleAddressLookup ) {
+			d->simpleAddressLookup->SetInputDirectory( addressLookupModule.path );
+		}
+		
 		if ( !d->router->LoadData() ) {
 			qCritical() << "Failed to load router data";
 			success = false;
@@ -412,23 +431,32 @@ bool MapData::load( const Module& routingModule, const Module& renderingModule, 
 			qCritical() << "Failed to load renderer data";
 			success = false;
 		}
-		if ( !d->addressLookup->LoadData() ) {
+		if ( !d->addressLookup || !d->addressLookup->LoadData() ) {
 			qCritical() << "Failed to load address lookup data";
-			success = false;
 		}
-
+		if ( !d->simpleAddressLookup || !d->simpleAddressLookup->LoadData() ) {
+			qCritical() << "Failed to load simple address lookup data";
+		}
 
 		if ( !success ) {
 			d->router->UnloadData();
 			d->gpsLookup->UnloadData();
 			d->renderer->UnloadData();
-			d->addressLookup->UnloadData();
+			if ( d->addressLookup ) {
+				d->addressLookup->UnloadData();
+				d->addressLookup = NULL;
+			}
+			if (d->simpleAddressLookup) {
+				d->simpleAddressLookup->UnloadData();
+				d->simpleAddressLookup = NULL;
+			}
 		}
 
 	}
 
 	if ( !success ) {
 		d->addressLookup = NULL;
+		d->simpleAddressLookup = NULL;
 		d->gpsLookup = NULL;
 		d->renderer = NULL;
 		d->router = NULL;
@@ -459,6 +487,8 @@ bool MapData::unload()
 	if ( d->loaded ) {
 		if ( d->addressLookup != NULL )
 			d->addressLookup->UnloadData();
+		if ( d->simpleAddressLookup != NULL )
+			d->simpleAddressLookup->UnloadData();
 		if ( d->gpsLookup != NULL )
 			d->gpsLookup->UnloadData();
 		if ( d->renderer != NULL )
@@ -468,6 +498,7 @@ bool MapData::unload()
 	}
 
 	d->addressLookup = NULL;
+	d->simpleAddressLookup = NULL;
 	d->gpsLookup = NULL;
 	d->renderer = NULL;
 	d->router = NULL;
@@ -638,6 +669,11 @@ const MapData::MapPackage& MapData::information() const
 IAddressLookup* MapData::addressLookup()
 {
 	return d->addressLookup;
+}
+
+ISimpleAddressLookup* MapData::simpleAddressLookup()
+{
+	return d->simpleAddressLookup;
 }
 
 IGPSLookup* MapData::gpsLookup()

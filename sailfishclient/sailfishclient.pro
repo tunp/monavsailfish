@@ -53,7 +53,7 @@ HEADERS += \
 
 DESTDIR = ../
 
-LIBS += -L../bin/plugins_client -lmapnikrendererclient -lcontractionhierarchiesclient -lgpsgridclient -losmrendererclient -lunicodetournamenttrieclient -lqtilerendererclient
+LIBS += -L../bin/plugins_client -lmapnikrendererclient -lcontractionhierarchiesclient -lgpsgridclient -losmrendererclient -lunicodetournamenttrieclient -lsimpleunicodetournamenttrieclient -lqtilerendererclient
 
 INCLUDEPATH += ..
 

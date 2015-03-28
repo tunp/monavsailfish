@@ -17,24 +17,17 @@ You should have received a copy of the GNU General Public License
 along with MoNav.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "preprocessingwindow.h"
-#include <QtPlugin>
-#include <QApplication>
+#include "uttsettingsdialog.h"
+#include "ui_uttsettingsdialog.h"
 
-Q_IMPORT_PLUGIN( MapnikRenderer );
-Q_IMPORT_PLUGIN( ContractionHierarchies );
-Q_IMPORT_PLUGIN( GPSGrid );
-Q_IMPORT_PLUGIN( UnicodeTournamentTrie );
-Q_IMPORT_PLUGIN( SimpleUnicodeTournamentTrie );
-Q_IMPORT_PLUGIN( OSMRenderer );
-Q_IMPORT_PLUGIN( QtileRenderer );
-Q_IMPORT_PLUGIN( OSMImporter );
-
-int main(int argc, char *argv[])
+UTTSettingsDialog::UTTSettingsDialog( QWidget* parent ) :
+		QWidget( parent ),
+		m_ui( new Ui::UTTSettingsDialog )
 {
-	QApplication a(argc, argv);
+	m_ui->setupUi( this );
+}
 
-	PreprocessingWindow w;
-	w.show();
-	return a.exec();
+UTTSettingsDialog::~UTTSettingsDialog()
+{
+	delete m_ui;
 }

@@ -32,6 +32,7 @@ Q_IMPORT_PLUGIN( MapnikRenderer );
 Q_IMPORT_PLUGIN( ContractionHierarchies );
 Q_IMPORT_PLUGIN( GPSGrid );
 Q_IMPORT_PLUGIN( UnicodeTournamentTrie );
+Q_IMPORT_PLUGIN( SimpleUnicodeTournamentTrie );
 Q_IMPORT_PLUGIN( OSMRenderer );
 Q_IMPORT_PLUGIN( QtileRenderer );
 Q_IMPORT_PLUGIN( OSMImporter );

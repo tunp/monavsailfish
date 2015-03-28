@@ -1,10 +1,11 @@
 TEMPLATE = subdirs
-SUBDIRS = ch gg osmr mr qr utt osmi ti
+SUBDIRS = ch gg osmr mr qr utt sutt osmi ti
 ch.file = contractionhierarchies/contractionhierarchies.pro
 gg.file = gpsgrid/gpsgrid.pro
 osmr.file = osmrenderer/osmrenderer.pro
 mr.file = osmrenderer/mapnikrenderer.pro
 qr.file = osmrenderer/qtilerenderer.pro
 utt.file = unicodetournamenttrie/unicodetournamenttrie.pro
+sutt.file = simpleutt/simpleunicodetournamenttrie.pro
 osmi.file = osmimporter/osmimporter.pro
 ti.file = testimporter/testimporter.pro

@@ -16,6 +16,7 @@ Q_IMPORT_PLUGIN( MapnikRendererClient );
 Q_IMPORT_PLUGIN( ContractionHierarchiesClient );
 Q_IMPORT_PLUGIN( GPSGridClient );
 Q_IMPORT_PLUGIN( UnicodeTournamentTrieClient );
+Q_IMPORT_PLUGIN( SimpleUnicodeTournamentTrieClient );
 Q_IMPORT_PLUGIN( OSMRendererClient );
 Q_IMPORT_PLUGIN( QtileRendererClient );
 
