@@ -143,23 +143,29 @@ Page {
 
 		Row {
 			x: 0
-			y: parent.height - 50
+			y: parent.height - height
 			width: parent.width
-			height: 50
-			Button {
+			height: 64
+			MouseArea {
+				height: parent.height
 				width: parent.width/2
-				text: "+"
-				color: "black"
-
+				Image {
+					x: parent.width / 2 - width / 2
+					source: "qrc:///images/oxygen/zoom-in.png"
+				}
+				 
 				onClicked: {
 					mainview.addZoom();
 				}
 			}
-			Button {
+			MouseArea {
+				height: parent.height
 				width: parent.width/2
-                text: "-"
-                color: "black"
-
+				Image {
+					x: parent.width / 2 - width / 2
+					source: "qrc:///images/oxygen/zoom-out.png"
+				}
+				 
 				onClicked: {
 					mainview.subtractZoom();
 				}
