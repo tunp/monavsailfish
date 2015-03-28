@@ -13,7 +13,9 @@ Page {
 	}
 
 	SilicaFlickable {
+		id: flick
 		anchors.fill: parent
+		contentHeight: contentcolumn.height
 		
 		PullDownMenu {
 			MenuItem {
@@ -25,6 +27,7 @@ Page {
 		}
 		
 		Column {
+			id: contentcolumn
 			anchors.left: parent.left
 			anchors.right: parent.right
 			
@@ -38,6 +41,7 @@ Page {
 				anchors.left: parent.left
 				anchors.right: parent.right
 				height: childrenRect.height
+				interactive: false
 				property int selindex
 				id: view
 				model: ListModel {
@@ -100,6 +104,8 @@ Page {
 			}
 		}
 	}
+	
+	ScrollDecorator { flickable: flick }
 
 	Component {
 		id: adddialog
