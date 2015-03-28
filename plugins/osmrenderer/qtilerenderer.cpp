@@ -45,7 +45,7 @@ along with MoNav.  If not, see <http://www.gnu.org/licenses/>.
 
 // Preprocessing will be split into chunks with an aim never to require more
 // than this amount of RAM. This is inexact.
-static unsigned long long g_memory_target = 100*1024*1024;
+static unsigned long long g_memory_target = 800*1024*1024;
 
 //Index granularity. Index is terminated at max depth, or when a part of the
 //index tree contains max_index_contents ways, whichever is the sooner.
@@ -812,6 +812,10 @@ void qtile_writer::init()
 		sprintf(buf, "/ways.%03d.tmp", i);
 		QString filename = dir + buf;
 		FILE *fp = fopen(filename.toLatin1(), "w");
+		if (!fp) {
+			qCritical() << "File" << filename.toLatin1() << "failed to open!";
+			perror("Error was: ");
+		}
 		files.push_back(std::pair<QString, FILE*>(filename, fp));
 		tempfile_ways.push_back(0);
 		tempfile_nodes.push_back(0);
