@@ -1,12 +1,10 @@
 Name: harbour-monav
 Summary: MoNav offers very fast and exact routing with OpenStreetMap data for mobile devices as well as desktop computers.
-Version: 0.1
+Version: 0.1.1
 Release: 1
 Group: Qt/Qt
 URL: https://code.google.com/p/monav/
 License: GPL
-Sources:
-- '%{name}-%{version}.tar.bz2'
 Description: |
   MoNav offers very fast and exact routing with OpenStreetMap data for mobile devices as well as desktop computers.
 Configure: none
