@@ -287,7 +287,7 @@ void PaintWidget::mouseMoveEvent( QMouseEvent* event )
 #ifdef Q_WS_MAEMO_5
 	minDiff = 15;
 #endif
-	if ( abs( event->x() - m_startMouseX ) + abs( event->y() - m_startMouseY ) > minDiff )
+	if ( fabs( event->x() - m_startMouseX ) + fabs( event->y() - m_startMouseY ) > minDiff )
 		m_drag = true;
 	if ( !m_drag )
 		return;
@@ -369,7 +369,7 @@ void PaintWidget::move(QVariantList list, QVariantList idlist) {
 	QPointF start_average = calcAverage(touch_start_pos);
 	
 	int minDiff = 7;
-	if ( abs( average.x() - start_average.x() ) + abs( average.y() - start_average.y() ) > minDiff )
+	if ( fabs( average.x() - start_average.x() ) + fabs( average.y() - start_average.y() ) > minDiff )
 		m_drag = true;
 
 	IRenderer* renderer = MapData::instance()->renderer();
