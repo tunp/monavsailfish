@@ -29,24 +29,24 @@ class IEntityReader {
 public:
 
 	struct Tag {
-		unsigned key;
+		unsigned long long key;
 		QString value;
 	};
 
 	struct Node {
-		unsigned id;
+		unsigned long long id;
 		GPSCoordinate coordinate;
 		std::vector< Tag > tags;
 	};
 
 	struct Way {
-		unsigned id;
-		std::vector< unsigned > nodes;
+		unsigned long long id;
+		std::vector< unsigned long long > nodes;
 		std::vector< Tag > tags;
 	};
 
 	struct RelationMember {
-		unsigned ref;
+		unsigned long long ref;
 		enum Type {
 			Way, Node, Relation
 		} type;
@@ -54,7 +54,7 @@ public:
 	};
 
 	struct Relation {
-		unsigned id;
+		unsigned long long id;
 		std::vector< RelationMember > members;
 		std::vector< Tag > tags;
 	};

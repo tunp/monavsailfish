@@ -979,7 +979,7 @@ unsigned char osm_way::type() const
  *             XML Parsing
  * *****************************************/
 struct node {
-	 int id;
+	 unsigned long long id;
 	 unsigned long x, y;
 };
 
@@ -995,7 +995,7 @@ class OSMReader {
 	 bool load_xml(const QString &filename, int pass=0);
 	 void add_node(IEntityReader::Node &node);
 	 bool add_way(IEntityReader::Way &w);
-	 bool get_node(int id, unsigned long *x, unsigned long *y);
+	 bool get_node(unsigned long long id, unsigned long *x, unsigned long *y);
 	void free_all_memory();
 	bool write_ways_to_temp_file();
 	bool load_ways_from_temp_file();
@@ -1004,7 +1004,7 @@ class OSMReader {
 
 	 vector<struct node> nodes;
 	 vector<class osm_way> ways;
-	typedef std::vector<pair<int,int> > nodes_to_load_t;
+	typedef std::vector<pair<unsigned long long,int> > nodes_to_load_t;
 	nodes_to_load_t nodes_to_load;
 	vector<placename> placenames;
 	int pass;
@@ -1218,13 +1218,13 @@ bool OSMReader::add_way(IEntityReader::Way &way)
 	 unsigned long x, y;
 	 if(!get_node(*way.nodes.begin(), &x, &y))  return true;
 	w.inodes = osm_way::all_nodes.size();
-	for(std::vector<unsigned int>::iterator i = way.nodes.begin();
+	for(std::vector<unsigned long long>::iterator i = way.nodes.begin();
 			i != way.nodes.end(); i++) {
 		//quadtile nq = get_node(*i);
 		projectedxy xy;
 		if(!get_node(*i, &xy.x, &xy.y)) return true;
 	    if(nodes.size()==0) //We are doing a 2 pass - record the nodes we need.
-			nodes_to_load.push_back(pair<int,int>(*i, osm_way::all_nodes.size()));
+			nodes_to_load.push_back(pair<unsigned long long,int>(*i, osm_way::all_nodes.size()));
 		osm_way::all_nodes.push_back(xy);
 		w.nnodes++;
 	}
@@ -1279,7 +1279,7 @@ void OSMReader::add_node(IEntityReader::Node &node)
 
 	if(pass==1) {
 		nodes_to_load_t::iterator i;
-		i = std::lower_bound(nodes_to_load.begin(), nodes_to_load.end(), pair<int,int>(n.id, 0));
+		i = std::lower_bound(nodes_to_load.begin(), nodes_to_load.end(), pair<unsigned long long,int>(n.id, 0));
 		while(i!=nodes_to_load.end() && i->first==n.id) {
 			osm_way::all_nodes[i->second].x = n.x;
 			osm_way::all_nodes[i->second].y = n.y;
@@ -1299,7 +1299,7 @@ void OSMReader::add_node(IEntityReader::Node &node)
   after first call to this function. On first call we sort nodes and then
   do a binary search. This uses less memory and works out faster than using
   a std::map for nodes*/
-bool OSMReader::get_node(int id, unsigned long *x, unsigned long *y)
+bool OSMReader::get_node(unsigned long long id, unsigned long *x, unsigned long *y)
 {
 	static bool sorted_nodes=false;
 	if(nodes.size()==0) { //Just save the id.
