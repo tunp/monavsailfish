@@ -30,9 +30,9 @@ along with MoNav.  If not, see <http://www.gnu.org/licenses/>.
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/load_map.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/image_view.hpp>
 #include <mapnik/config_error.hpp>
+#include <mapnik/projection.hpp>
 #include <omp.h>
 #include <QFile>
 #include <QTemporaryFile>
@@ -266,7 +266,7 @@ bool MapnikRenderer::Preprocess( IImporter* importer, QString dir )
 			const int metaTileSize = m_settings.metaTileSize * m_settings.tileSize + 2 * m_settings.margin;
 
 			mapnik::Map map;
-			mapnik::image_32 image( metaTileSize, metaTileSize );
+			mapnik::image<mapnik::rgba8_t> image( metaTileSize, metaTileSize );
 			QTemporaryFile tempOut;
 			QTemporaryFile tempIn;
 			mapnik::load_map( map, m_settings.theme.toLocal8Bit().constData() );
@@ -292,7 +292,7 @@ bool MapnikRenderer::Preprocess( IImporter* importer, QString dir )
 				projection.forward( drawBottomRightGPS.longitude, drawTopLeftGPS.latitude );
 				mapnik::box2d<double> boundingBox( drawTopLeftGPS.longitude, drawTopLeftGPS.latitude, drawBottomRightGPS.longitude, drawBottomRightGPS.latitude );
 				map.zoom_to_box( boundingBox );
-				mapnik::agg_renderer<mapnik::image_32> renderer( map, image );
+				mapnik::agg_renderer<mapnik::image<mapnik::rgba8_t>> renderer( map, image );
 				renderer.apply();
 
 				std::string data;
@@ -301,7 +301,7 @@ bool MapnikRenderer::Preprocess( IImporter* importer, QString dir )
 				for ( int subX = 0; subX < metaTileSizeX; ++subX ) {
 					for ( int subY = 0; subY < metaTileSizeY; ++subY ) {
 						int indexNumber = ( y + subY - info.minY ) * ( info.maxX - info.minX ) + x + subX - info.minX;
-						mapnik::image_view<mapnik::image_data_32> view = image.get_view( subX * m_settings.tileSize + m_settings.margin, subY * m_settings.tileSize + m_settings.margin, m_settings.tileSize, m_settings.tileSize );
+						mapnik::image_view<mapnik::image<mapnik::rgba8_t>> view(subX * m_settings.tileSize + m_settings.margin, subY * m_settings.tileSize + m_settings.margin, m_settings.tileSize, m_settings.tileSize, image );
 						std::string result;
 						if ( !m_settings.deleteTiles || info.index[( x + subX - info.minX ) + ( y + subY - info.minY ) * ( info.maxX - info.minX )].size == 1 ) {
 							if ( m_settings.reduceColors )
