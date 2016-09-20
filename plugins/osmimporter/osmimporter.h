@@ -159,9 +159,9 @@ protected:
 
 	struct Restriction {
 		enum { None, No, Only } type;
-		unsigned from;
-		unsigned to;
-		unsigned via;
+		unsigned long long from;
+		unsigned long long to;
+		unsigned long long via;
 		bool access;
 	};
 
@@ -247,16 +247,16 @@ protected:
 	};
 
 	struct NodePenalty {
-		unsigned id;
+		unsigned long long id;
 		int seconds;
 
-		NodePenalty( unsigned _id, int _seconds )
+		NodePenalty( unsigned long long _id, int _seconds )
 		{
 			id = _id;
 			seconds = _seconds;
 		}
 
-		NodePenalty( unsigned _id )
+		NodePenalty( unsigned long long _id )
 		{
 			id = _id;
 			seconds = 0;
@@ -276,7 +276,7 @@ protected:
 		bool forward : 1;
 		bool backward : 1;
 		bool crossing : 1;
-		unsigned oldID;
+		unsigned long long oldID;
 		double angle; // [-M_PI,+M_PI]
 		double length;
 		double speed;
@@ -288,9 +288,9 @@ protected:
 	};
 
 	struct RestrictionInfo {
-		unsigned from;
-		unsigned to;
-		unsigned via;
+		unsigned long long from;
+		unsigned long long to;
+		unsigned long long via;
 		bool exclude; // false == only
 
 		bool operator<( const RestrictionInfo& right ) const
@@ -327,11 +327,11 @@ protected:
 	std::vector< int > m_nodeModificatorIDs;
 
 	std::vector< NodePenalty > m_penaltyNodes;
-	std::vector< unsigned > m_noAccessNodes;
+	std::vector< unsigned long long > m_noAccessNodes;
 
-	std::vector< unsigned > m_usedNodes;
-	std::vector< unsigned > m_routingNodes;
-	std::vector< unsigned > m_outlineNodes;
+	std::vector< unsigned long long > m_usedNodes;
+	std::vector< unsigned long long > m_routingNodes;
+	std::vector< unsigned long long > m_outlineNodes;
 	QHash< QString, unsigned > m_wayNames;
 	QHash< QString, unsigned > m_wayRefs;
 

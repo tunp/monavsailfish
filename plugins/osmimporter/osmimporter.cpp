@@ -138,11 +138,11 @@ bool OSMImporter::SaveSettings( QSettings* settings )
 
 void OSMImporter::clear()
 {
-	std::vector< unsigned >().swap( m_usedNodes );
-	std::vector< unsigned >().swap( m_outlineNodes );
-	std::vector< unsigned >().swap( m_routingNodes );
+	std::vector< unsigned long long >().swap( m_usedNodes );
+	std::vector< unsigned long long >().swap( m_outlineNodes );
+	std::vector< unsigned long long >().swap( m_routingNodes );
 	std::vector< NodePenalty >().swap( m_penaltyNodes );
-	std::vector< unsigned >().swap( m_noAccessNodes );
+	std::vector< unsigned long long >().swap( m_noAccessNodes );
 	m_wayNames.clear();
 	m_wayRefs.clear();
 	std::vector< int >().swap( m_nodeModificatorIDs );
@@ -328,7 +328,7 @@ bool OSMImporter::read( const QString& inputFilename, const QString& filename ) 
 					m_noAccessNodes.push_back( inputNode.id );
 
 				UnsignedCoordinate coordinate( inputNode.coordinate );
-				nodeData << unsigned( inputNode.id ) << coordinate.x << coordinate.y;
+				nodeData << (unsigned long long)( inputNode.id ) << coordinate.x << coordinate.y;
 
 				if ( node.type != Place::None && !node.name.isEmpty() ) {
 					placeData << inputNode.coordinate.latitude << inputNode.coordinate.longitude << unsigned( node.type ) << node.population << node.name;
@@ -478,12 +478,12 @@ bool OSMImporter::preprocessData( const QString& filename ) {
 	Timer time;
 
 	while ( true ) {
-		unsigned node;
+		unsigned long long node;
 		UnsignedCoordinate coordinate;
 		allNodesData >> node >> coordinate.x >> coordinate.y;
 		if ( allNodesData.status() == QDataStream::ReadPastEnd )
 			break;
-		std::vector< NodeID >::const_iterator element = std::lower_bound( m_usedNodes.begin(), m_usedNodes.end(), node );
+		std::vector< unsigned long long >::const_iterator element = std::lower_bound( m_usedNodes.begin(), m_usedNodes.end(), node );
 		if ( element != m_usedNodes.end() && *element == node )
 			nodeCoordinates[element - m_usedNodes.begin()] = coordinate;
 		element = std::lower_bound( m_outlineNodes.begin(), m_outlineNodes.end(), node );
@@ -512,7 +512,7 @@ bool OSMImporter::preprocessData( const QString& filename ) {
 
 	qDebug() << "OSM Importer: wrote routing node coordinates:" << time.restart() << "ms";
 
-	std::vector< unsigned >().swap( m_usedNodes );
+	std::vector< unsigned long long >().swap( m_usedNodes );
 	std::vector< UnsignedCoordinate >().swap( nodeCoordinates );
 
 	if ( !computeTurningPenalties( filename ) )
@@ -543,7 +543,7 @@ bool OSMImporter::computeInCityFlags( QString filename, std::vector< NodeLocatio
 
 		bool valid = true;
 		for ( int i = 0; i < ( int ) numberOfPathNodes; ++i ) {
-			unsigned node;
+			unsigned long long node;
 			cityOutlinesData >> node;
 			NodeID mappedNode = std::lower_bound( m_outlineNodes.begin(), m_outlineNodes.end(), node ) - m_outlineNodes.begin();
 			if ( !outlineCoordinates[mappedNode].IsValid() ) {
@@ -699,7 +699,8 @@ bool OSMImporter::remapEdges( QString filename, const std::vector< UnsignedCoord
 	for ( int onewayType = 0; onewayType < 2; onewayType++ ) {
 		while ( true ) {
 			double speed;
-			unsigned id, numberOfPathNodes, type, nameID, refID;
+			unsigned long long id;
+			unsigned numberOfPathNodes, type, nameID, refID;
 			int addFixed, addPercentage;
 			bool bidirectional, roundabout;
 			std::vector< unsigned > way;
@@ -723,7 +724,7 @@ bool OSMImporter::remapEdges( QString filename, const std::vector< UnsignedCoord
 			bool valid = true;
 
 			for ( int i = 0; i < ( int ) numberOfPathNodes; ++i ) {
-				unsigned node;
+				unsigned long long node;
 				if ( onewayType == 0 )
 					edgeData >> node;
 				else
@@ -1371,9 +1372,9 @@ void OSMImporter::readRelation( Relation* relation, const IEntityReader::Relatio
 {
 	relation->type = Relation::TypeNone;
 	relation->restriction.access = true;
-	relation->restriction.from = std::numeric_limits< unsigned >::max();
-	relation->restriction.to = std::numeric_limits< unsigned >::max();;
-	relation->restriction.via = std::numeric_limits< unsigned >::max();
+	relation->restriction.from = std::numeric_limits< unsigned long long >::max();
+	relation->restriction.to = std::numeric_limits< unsigned long long >::max();;
+	relation->restriction.via = std::numeric_limits< unsigned long long >::max();
 	relation->restriction.type = Restriction::None;
 
 	for ( unsigned tag = 0; tag < inputRelation.tags.size(); tag++ ) {
